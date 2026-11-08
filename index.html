@@ -94,17 +94,17 @@
     <audio id="audioPlayer" controls></audio>
 
     <ul id="playlist" class="playlist">
-        <li data-src="https://docs.google.com/uc?export=download&id=1RNxN0TQ1sB8wZFOuIwYiiqUiy_v6oZA8">1. What Are You In The Mood For</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1cJICdzADezjRNgOxcJwig1ic0tC520w0">2. Sun Up Pull Up</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1sPBgpmgOAYf2xh5GClyBby4aYhYP16zb">3. Bring It On Back</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1Gk1iygqE8JYwyxl3qgrSKhVpELT1vLFv">4. I Won’t Let You Down</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1fEti5eTTNpI3EQ8C3ch9pa0PKkynmw9c">5. Write Your Name In Pencil</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=16C7k0KkG26odkAvu0Ebqwa4Mq5Lf0bYn">6. Hate On Me</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1MfSAgnGYGaLtCsss9OadGcZHvUDw2qtP">7. Running Thru The Red Light</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=12ht_aY49jjtoLaNgbjg-kMkVqcklMyrv">8. Gotta Pull Over</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1S3lWcz78LBJlrtyVU5IHTRcnxheiXqwk">9. My Favorite Game</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1dpFrTRPHib4j1tSYbZiYhI73H1RBvhLK">10. Vibrate On You</li>
-        <li data-src="https://docs.google.com/uc?export=download&id=1GTOb8IrZy4HpZscKiQMod2ETH6RJ6yl7">11. Stuffed Moodie Muffins</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1RNxN0TQ1sB8wZFOuIwYiiqUiy_v6oZA8">1. What Are You In The Mood For</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1cJICdzADezjRNgOxcJwig1ic0tC520w0">2. Sun Up Pull Up</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1sPBgpmgOAYf2xh5GClyBby4aYhYP16zb">3. Bring It On Back</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1Gk1iygqE8JYwyxl3qgrSKhVpELT1vLFv">4. I Won’t Let You Down</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1fEti5eTTNpI3EQ8C3ch9pa0PKkynmw9c">5. Write Your Name In Pencil</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=16C7k0KkG26odkAvu0Ebqwa4Mq5Lf0bYn">6. Hate On Me</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1MfSAgnGYGaLtCsss9OadGcZHvUDw2qtP">7. Running Thru The Red Light</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=12ht_aY49jjtoLaNgbjg-kMkVqcklMyrv">8. Gotta Pull Over</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1S3lWcz78LBJlrtyVU5IHTRcnxheiXqwk">9. My Favorite Game</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1dpFrTRPHib4j1tSYbZiYhI73H1RBvhLK">10. Vibrate On You</li>
+        <li data-src="https://docs.google.com/uc?export=open&id=1GTOb8IrZy4HpZscKiQMod2ETH6RJ6yl7">11. Stuffed Moodie Muffins</li>
     </ul>
 </div>
 
@@ -118,7 +118,7 @@
         tracks.forEach(t => t.classList.remove('active'));
         tracks[index].classList.add('active');
         audio.src = tracks[index].getAttribute('data-src');
-        audio.play();
+        audio.play().catch(e => console.log("Playback interaction needed:", e));
     }
 
     tracks.forEach((track, index) => {
