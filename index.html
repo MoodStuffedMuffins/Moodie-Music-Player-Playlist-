@@ -146,6 +146,11 @@
             background: #FDF2F2;
             border: 1px solid var(--heart-red);
         }
+        .ctrl-btn.loop.looping {
+            background: var(--gold-accent);
+            color: var(--card-white);
+            border: 1px solid var(--chocolate-brown);
+        }
 
         /* Volume Control Row */
         .volume-row {
@@ -253,7 +258,7 @@
 
     <!-- Custom Control Deck -->
     <div class="controls-deck">
-        <button id="replayBtn" class="ctrl-btn" title="Replay Track">🔄</button>
+        <button id="loopBtn" class="ctrl-btn loop" title="Loop Current Song">🔂</button>
         <button id="prevBtn" class="ctrl-btn" title="Previous Track">⏮</button>
         <button id="playPauseBtn" class="ctrl-btn play-pause" title="Play/Pause">▶</button>
         <button id="nextBtn" class="ctrl-btn" title="Next Track">⏭</button>
@@ -298,7 +303,7 @@
     const playPauseBtn = document.getElementById('playPauseBtn');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const replayBtn = document.getElementById('replayBtn');
+    const loopBtn = document.getElementById('loopBtn');
     const favBtn = document.getElementById('favBtn');
     const currentTrackLabel = document.getElementById('currentTrackLabel');
     const progressBar = document.getElementById('progressBar');
@@ -311,6 +316,7 @@
     let currentTrackIndex = 0;
     let favorites = new Set();
     let showingOnlyFavs = false;
+    let isLooping = false;
 
     function formatTime(seconds) {
         const mins = Math.floor(seconds / 60);
@@ -368,11 +374,16 @@
         loadTrack(currentTrackIndex, true);
     });
 
-    // Replay current track
-    replayBtn.addEventListener('click', () => {
-        audio.currentTime = 0;
-        audio.play();
-        playPauseBtn.textContent = '⏸';
+    // Loop / Repeat One Toggle
+    loopBtn.addEventListener('click', () => {
+        isLooping = !isLooping;
+        if (isLooping) {
+            loopBtn.classList.add('looping');
+            loopBtn.title = "Looping Current Song (ON)";
+        } else {
+            loopBtn.classList.remove('looping');
+            loopBtn.title = "Loop Current Song (OFF)";
+        }
     });
 
     // Favorite / Personal Mix Toggle
@@ -439,10 +450,15 @@
         }
     });
 
-    // Auto advance when track ends
+    // Track ending behavior (Respects Loop vs Next Track)
     audio.addEventListener('ended', () => {
-        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-        loadTrack(currentTrackIndex, true);
+        if (isLooping) {
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack(currentTrackIndex, true);
+        }
     });
 
     // Initialize first track preloaded
