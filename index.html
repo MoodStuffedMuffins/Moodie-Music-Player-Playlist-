@@ -146,6 +146,11 @@
             background: #FDF2F2;
             border: 1px solid var(--heart-red);
         }
+        .ctrl-btn.loop.looping {
+            background: var(--gold-accent);
+            color: var(--card-white);
+            border: 1px solid var(--chocolate-brown);
+        }
 
         /* Volume Control Row */
         .volume-row {
@@ -253,7 +258,7 @@
 
     <!-- Custom Control Deck -->
     <div class="controls-deck">
-        <button id="replayBtn" class="ctrl-btn" title="Replay Track">🔄</button>
+        <button id="loopBtn" class="ctrl-btn loop" title="Loop Current Song">🔂</button>
         <button id="prevBtn" class="ctrl-btn" title="Previous Track">⏮</button>
         <button id="playPauseBtn" class="ctrl-btn play-pause" title="Play/Pause">▶</button>
         <button id="nextBtn" class="ctrl-btn" title="Next Track">⏭</button>
@@ -298,9 +303,170 @@
     const playPauseBtn = document.getElementById('playPauseBtn');
     const prevBtn = document.getElementById('prevBtn');
     const nextBtn = document.getElementById('nextBtn');
-    const replayBtn = document.getElementById('replayBtn');
+    const loopBtn = document.getElementById('loopBtn');
     const favBtn = document.getElementById('favBtn');
     const currentTrackLabel = document.getElementById('currentTrackLabel');
     const progressBar = document.getElementById('progressBar');
     const progressContainer = document.getElementById('progressContainer');
-    const filterFavs = document.getElementById('filterFav
+    const filterFavs = document.getElementById('filterFavs');
+    const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+    const durationDisplay = document.getElementById('durationDisplay');
+    const volumeSlider = document.getElementById('volumeSlider');
+
+    let currentTrackIndex = 0;
+    let favorites = new Set();
+    let showingOnlyFavs = false;
+    let isLooping = false;
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function loadTrack(index, autoPlay = true) {
+        tracks.forEach(t => t.classList.remove('active'));
+        tracks[index].classList.add('active');
+        audio.src = tracks[index].getAttribute('data-src');
+        currentTrackLabel.textContent = tracks[index].querySelector('span').textContent;
+        
+        updateFavButtonState();
+
+        if (autoPlay) {
+            audio.play().then(() => {
+                playPauseBtn.textContent = '⏸';
+            }).catch(e => {
+                playPauseBtn.textContent = '▶';
+                console.log("Autoplay blocked:", e);
+            });
+        }
+    }
+
+    function updateFavButtonState() {
+        if (favorites.has(currentTrackIndex)) {
+            favBtn.classList.add('favorited');
+        } else {
+            favBtn.classList.remove('favorited');
+        }
+    }
+
+    // Play/Pause toggle
+    playPauseBtn.addEventListener('click', () => {
+        if (audio.paused) {
+            if (!audio.src) loadTrack(currentTrackIndex);
+            audio.play();
+            playPauseBtn.textContent = '⏸';
+        } else {
+            audio.pause();
+            playPauseBtn.textContent = '▶';
+        }
+    });
+
+    // Next Track
+    nextBtn.addEventListener('click', () => {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex, true);
+    });
+
+    // Previous Track
+    prevBtn.addEventListener('click', () => {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(currentTrackIndex, true);
+    });
+
+    // Loop / Repeat One Toggle
+    loopBtn.addEventListener('click', () => {
+        isLooping = !isLooping;
+        if (isLooping) {
+            loopBtn.classList.add('looping');
+            loopBtn.title = "Looping Current Song (ON)";
+        } else {
+            loopBtn.classList.remove('looping');
+            loopBtn.title = "Loop Current Song (OFF)";
+        }
+    });
+
+    // Favorite / Personal Mix Toggle
+    favBtn.addEventListener('click', () => {
+        const li = tracks[currentTrackIndex];
+        if (favorites.has(currentTrackIndex)) {
+            favorites.delete(currentTrackIndex);
+            li.classList.remove('is-fav');
+        } else {
+            favorites.add(currentTrackIndex);
+            li.classList.add('is-fav');
+        }
+        updateFavButtonState();
+    });
+
+    // Filter favorites view toggle
+    filterFavs.addEventListener('click', () => {
+        showingOnlyFavs = !showingOnlyFavs;
+        filterFavs.textContent = showingOnlyFavs ? "Show All Tracks" : "Filter Favorites";
+        tracks.forEach((li, idx) => {
+            if (showingOnlyFavs && !favorites.has(idx)) {
+                li.style.display = 'none';
+            } else {
+                li.style.display = 'flex';
+            }
+        });
+    });
+
+    // Playlist item click
+    tracks.forEach((track, index) => {
+        track.addEventListener('click', () => {
+            currentTrackIndex = index;
+            loadTrack(currentTrackIndex, true);
+        });
+    });
+
+    // Volume control slider
+    volumeSlider.addEventListener('input', (e) => {
+        audio.volume = e.target.value;
+    });
+
+    // Audio progress bar & time updates
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + '%';
+            currentTimeDisplay.textContent = formatTime(audio.currentTime);
+            durationDisplay.textContent = formatTime(audio.duration);
+        }
+    });
+
+    // Metadata loaded for duration
+    audio.addEventListener('loadedmetadata', () => {
+        durationDisplay.textContent = formatTime(audio.duration);
+    });
+
+    // Click on progress bar to seek
+    progressContainer.addEventListener('click', (e) => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        if (duration) {
+            audio.currentTime = (clickX / width) * duration;
+        }
+    });
+
+    // Track ending behavior (Respects Loop vs Next Track)
+    audio.addEventListener('ended', () => {
+        if (isLooping) {
+            audio.currentTime = 0;
+            audio.play();
+        } else {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack(currentTrackIndex, true);
+        }
+    });
+
+    // Initialize first track preloaded
+    if(tracks.length > 0) {
+        audio.src = tracks[0].getAttribute('data-src');
+        currentTrackLabel.textContent = "Tap Play or Select a Track";
+    }
+</script>
+
+</body>
+</html>
