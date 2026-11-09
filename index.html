@@ -11,6 +11,7 @@
             --gold-accent: #C5A880;
             --card-white: #FFFCF7;
             --card-border: #D8CEBE;
+            --heart-red: #D9534F;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -28,7 +29,7 @@
             max-width: 440px;
             background: var(--card-white);
             border: 2px solid var(--gold-accent);
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 28px;
             box-shadow: 0 10px 30px rgba(59, 34, 25, 0.12);
             text-align: center;
@@ -59,23 +60,83 @@
             font-size: 0.95rem;
             color: var(--chocolate-brown);
             font-style: italic;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             font-weight: 500;
         }
-        .layers-banner {
+        .current-track-display {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--chocolate-brown);
+            margin-bottom: 12px;
+            background: var(--bg-cream);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--card-border);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Custom Control Deck */
+        .controls-deck {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .ctrl-btn {
             background: var(--chocolate-brown);
             color: var(--bg-cream);
-            padding: 8px;
-            font-size: 0.9rem;
-            font-style: italic;
-            letter-spacing: 1px;
-            border-radius: 6px;
-            margin-bottom: 20px;
+            border: none;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(59, 34, 25, 0.2);
         }
-        audio {
+        .ctrl-btn:hover {
+            background: var(--gold-accent);
+            color: var(--card-white);
+            transform: scale(1.05);
+        }
+        .ctrl-btn.play-pause {
+            width: 52px;
+            height: 52px;
+            font-size: 1.2rem;
+            background: var(--gold-accent);
+            color: var(--card-white);
+        }
+        .ctrl-btn.play-pause:hover {
+            background: var(--chocolate-brown);
+        }
+        .ctrl-btn.favorite.favorited {
+            color: var(--heart-red);
+            background: #FDF2F2;
+            border: 1px solid var(--heart-red);
+        }
+        
+        .progress-container {
             width: 100%;
-            margin: 10px 0 20px 0;
+            background: var(--card-border);
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            position: relative;
         }
+        .progress-bar {
+            background: var(--gold-accent);
+            height: 100%;
+            width: 0%;
+            border-radius: 3px;
+            transition: width 0.1s linear;
+        }
+
         .playlist-title {
             text-align: left;
             font-size: 0.8rem;
@@ -84,13 +145,16 @@
             color: var(--gold-accent);
             margin-bottom: 8px;
             font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .playlist {
             text-align: left;
             list-style: none;
             padding: 0;
             margin: 0;
-            max-height: 240px;
+            max-height: 220px;
             overflow-y: auto;
             border: 1px solid var(--card-border);
             border-radius: 10px;
@@ -104,12 +168,15 @@
             border-radius: 3px;
         }
         .playlist li {
-            padding: 11px 14px;
+            padding: 10px 14px;
             border-bottom: 1px solid var(--card-border);
             cursor: pointer;
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--chocolate-brown);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: all 0.2s ease;
         }
         .playlist li:last-child {
@@ -123,33 +190,59 @@
             color: var(--card-white);
             font-weight: 700;
         }
+        .track-fav-icon {
+            font-size: 0.8rem;
+            opacity: 0.3;
+        }
+        .playlist li.is-fav .track-fav-icon {
+            opacity: 1;
+            color: var(--heart-red);
+        }
     </style>
 </head>
 <body>
 
 <div class="player-container">
-    <div class="brand-header">MOOD</div>
-    <div class="brand-subtitle">Stuffed Moodie Muffins</div>
+    <div class="brand-header">MOODIE MUSIC</div>
+    <div class="brand-subtitle">STUFFED MOOD MUFFINS</div>
     <div class="divider"></div>
     <div class="tagline">"What are you in the mood for?"</div>
-    <div class="layers-banner">Every MOOD Has Layers</div>
 
-    <audio id="audioPlayer" controls></audio>
+    <div id="currentTrackLabel" class="current-track-display">Select a track to play</div>
 
-    <div class="playlist-title">Exclusive Moodie Music Playlist</div>
+    <!-- Custom Control Deck -->
+    <div class="controls-deck">
+        <button id="replayBtn" class="ctrl-btn" title="Replay Track">🔄</button>
+        <button id="prevBtn" class="ctrl-btn" title="Previous Track">⏮</button>
+        <button id="playPauseBtn" class="ctrl-btn play-pause" title="Play/Pause">▶</button>
+        <button id="nextBtn" class="ctrl-btn" title="Next Track">⏭</button>
+        <button id="favBtn" class="ctrl-btn favorite" title="Favorite Track">❤️</button>
+    </div>
+
+    <div id="progressContainer" class="progress-container">
+        <div id="progressBar" class="progress-bar"></div>
+    </div>
+
+    <!-- Hidden native audio element -->
+    <audio id="audioPlayer"></audio>
+
+    <div class="playlist-title">
+        <span>Playlist</span>
+        <span id="filterFavs" style="cursor: pointer; font-size: 0.75rem; text-decoration: underline;">Filter Favorites</span>
+    </div>
     <ul id="playlist" class="playlist">
-        <li data-src="What are you in the mood for-Moodies Theme.mp3">1. What Are You In The Mood For</li>
-        <li data-src="Sun Up Pull Up (1).mp3">2. Sun Up Pull Up</li>
-        <li data-src="Bring It On Back.mp3">3. Bring It On Back</li>
-        <li data-src="I Won't Let You Down-da remix (1).mp3">4. I Won’t Let You Down</li>
-        <li data-src="Write You in Pencil (1).mp3">5. Write Your Name In Pencil</li>
-        <li data-src="Hate On Me.mp3">6. Hate On Me</li>
-        <li data-src="Running Through The Red Light (1).mp3">7. Running Thru The Red Light</li>
-        <li data-src="Pull Over (1).mp3">8. Gotta Pull Over</li>
-        <li data-src="My Favorite Game (1).mp3">9. My Favorite Game</li>
-        <li data-src="Vibrate On You (Edit) (1).m4a">10. Vibrate On You</li>
-        <li data-src="Stuffed Moodie Muffins.mp3">11. Stuffed Moodie Muffins</li>
-        <li data-src="It's My Fault (Edit) (1).m4a">12. It's My Fault</li>
+        <li data-src="What are you in the mood for-Moodies Theme.mp3"><span>1. What Are You In The Mood For</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Sun Up Pull Up (1).mp3"><span>2. Sun Up Pull Up</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Bring It On Back.mp3"><span>3. Bring It On Back</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="I Won't Let You Down-da remix (1).mp3"><span>4. I Won’t Let You Down</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Write You in Pencil (1).mp3"><span>5. Write Your Name In Pencil</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Hate On Me.mp3"><span>6. Hate On Me</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Running Through The Red Light (1).mp3"><span>7. Running Thru The Red Light</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Pull Over (1).mp3"><span>8. Gotta Pull Over</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="My Favorite Game (1).mp3"><span>9. My Favorite Game</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Vibrate On You (Edit) (1).m4a"><span>10. Vibrate On You</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="Stuffed Moodie Muffins.mp3"><span>11. Stuffed Moodie Muffins</span><span class="track-fav-icon">♥</span></li>
+        <li data-src="It's My Fault (Edit) (1).m4a"><span>12. It's My Fault</span><span class="track-fav-icon">♥</span></li>
     </ul>
 </div>
 
@@ -157,29 +250,139 @@
     const audio = document.getElementById('audioPlayer');
     const playlist = document.getElementById('playlist');
     const tracks = playlist.querySelectorAll('li');
-    let currentTrackIndex = 0;
+    const playPauseBtn = document.getElementById('playPauseBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const replayBtn = document.getElementById('replayBtn');
+    const favBtn = document.getElementById('favBtn');
+    const currentTrackLabel = document.getElementById('currentTrackLabel');
+    const progressBar = document.getElementById('progressBar');
+    const progressContainer = document.getElementById('progressContainer');
+    const filterFavs = document.getElementById('filterFavs');
 
-    function loadTrack(index) {
+    let currentTrackIndex = 0;
+    let favorites = new Set();
+    let showingOnlyFavs = false;
+
+    function loadTrack(index, autoPlay = true) {
         tracks.forEach(t => t.classList.remove('active'));
         tracks[index].classList.add('active');
         audio.src = tracks[index].getAttribute('data-src');
-        audio.play().catch(e => console.log("Playback interaction needed:", e));
+        currentTrackLabel.textContent = tracks[index].querySelector('span').textContent;
+        
+        updateFavButtonState();
+
+        if (autoPlay) {
+            audio.play().then(() => {
+                playPauseBtn.textContent = '⏸';
+            }).catch(e => {
+                playPauseBtn.textContent = '▶';
+                console.log("Autoplay blocked:", e);
+            });
+        }
     }
 
-    tracks.forEach((track, index) => {
-        track.addEventListener('click', () => {
-            currentTrackIndex = index;
-            loadTrack(currentTrackIndex);
+    function updateFavButtonState() {
+        if (favorites.has(currentTrackIndex)) {
+            favBtn.classList.add('favorited');
+        } else {
+            favBtn.classList.remove('favorited');
+        }
+    }
+
+    // Play/Pause toggle
+    playPauseBtn.addEventListener('click', () => {
+        if (audio.paused) {
+            if (!audio.src) loadTrack(currentTrackIndex);
+            audio.play();
+            playPauseBtn.textContent = '⏸';
+        } else {
+            audio.pause();
+            playPauseBtn.textContent = '▶';
+        }
+    });
+
+    // Next Track
+    nextBtn.addEventListener('click', () => {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex, true);
+    });
+
+    // Previous Track
+    prevBtn.addEventListener('click', () => {
+        currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+        loadTrack(currentTrackIndex, true);
+    });
+
+    // Replay current track
+    replayBtn.addEventListener('click', () => {
+        audio.currentTime = 0;
+        audio.play();
+        playPauseBtn.textContent = '⏸';
+    });
+
+    // Favorite / Personal Mix Toggle
+    favBtn.addEventListener('click', () => {
+        const li = tracks[currentTrackIndex];
+        if (favorites.has(currentTrackIndex)) {
+            favorites.delete(currentTrackIndex);
+            li.classList.remove('is-fav');
+        } else {
+            favorites.add(currentTrackIndex);
+            li.classList.add('is-fav');
+        }
+        updateFavButtonState();
+    });
+
+    // Filter favorites view toggle
+    filterFavs.addEventListener('click', () => {
+        showingOnlyFavs = !showingOnlyFavs;
+        filterFavs.textContent = showingOnlyFavs ? "Show All Tracks" : "Filter Favorites";
+        tracks.forEach((li, idx) => {
+            if (showingOnlyFavs && !favorites.has(idx)) {
+                li.style.display = 'none';
+            } else {
+                li.style.display = 'flex';
+            }
         });
     });
 
-    audio.addEventListener('ended', () => {
-        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
-        loadTrack(currentTrackIndex);
+    // Playlist item click
+    tracks.forEach((track, index) => {
+        track.addEventListener('click', () => {
+            currentTrackIndex = index;
+            loadTrack(currentTrackIndex, true);
+        });
     });
 
+    // Audio progress bar updates
+    audio.addEventListener('timeupdate', () => {
+        if (audio.duration) {
+            const percent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = percent + '%';
+        }
+    });
+
+    // Click on progress bar to seek
+    progressContainer.addEventListener('click', (e) => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audio.duration;
+        if (duration) {
+            audio.currentTime = (clickX / width) * duration;
+        }
+    });
+
+    // Auto advance when track ends
+    audio.addEventListener('ended', () => {
+        currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+        loadTrack(currentTrackIndex, true);
+    });
+
+    // Initialize first track preloaded (paused until clicked)
     if(tracks.length > 0) {
         audio.src = tracks[0].getAttribute('data-src');
+        currentTrackLabel.textContent = "Tap Play or Select a Track";
     }
 </script>
 
